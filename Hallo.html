@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一封并不普通的信</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            min-height: 100vh;
+            /* 背景图 */
+            background: url("https://i.imgs.ovh/2026/06/17/6ac1ae812918e99bd8fd051afedaf20c.jpg") center/cover fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* 初始遮罩层 */
+        .cover {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: opacity 1s ease;
+        }
+
+        .cover.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 小猫容器 相对定位基准 */
+        .cat-img-box {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin-bottom: 20px;
+        }
+
+        .cat-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* ========== 精准鼻头点击区域（已精细校准坐标） ========== */
+        .nose-click-area {
+            position: absolute;
+            top: 57%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 26px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            /* 打开下面这条红色边框可直观看到点击范围，调试完成后可注释 */
+            /* border: 2px solid rgba(255,0,0,0.6); */
+        }
+
+        .cover-text {
+            color: white;
+            font-size: 20px;
+            text-shadow: 0 0 10px rgba(0,0,0,0.3);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* 信纸默认隐藏 */
+        .letter-card {
+            background: rgba(255, 255, 255, 0.9);
+            width: 100%;
+            max-width: 580px;
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1.2s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        .letter-card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card-decor {
+            width: 60px;
+            height: 3px;
+            background: #999;
+            margin: 0 auto 35px;
+            border-radius: 3px;
+            opacity: 0;
+        }
+
+        .letter-title {
+            text-align: center;
+            font-size: 24px;
+            color: #444;
+            margin-bottom: 30px;
+            opacity: 0;
+        }
+
+        .letter-content p {
+            font-size: 16px;
+            line-height: 1.9;
+            color: #555;
+            text-indent: 2em;
+            margin-bottom: 22px;
+            opacity: 0;
+        }
+
+        .letter-sign {
+            text-align: right;
+            margin-top: 40px;
+            font-size: 17px;
+            color: #666;
+            opacity: 0;
+        }
+
+        /* 文字逐行淡入动画 */
+        .letter-card.show .card-decor { animation: textFade 0.8s 0.3s forwards; }
+        .letter-card.show .letter-title { animation: textFade 0.8s 0.6s forwards; }
+        .letter-card.show p:nth-child(1) { animation: textFade 0.8s 1s forwards; }
+        .letter-card.show p:nth-child(2) { animation: textFade 0.8s 1.4s forwards; }
+        .letter-card.show p:nth-child(3) { animation: textFade 0.8s 1.8s forwards; }
+        .letter-card.show p:nth-child(4) { animation: textFade 0.8s 2.2s forwards; }
+        .letter-card.show .letter-sign { animation: textFade 0.8s 2.8s forwards; }
+
+        @keyframes textFade {
+            to { opacity: 1; }
+        }
+
+        /* 移动端自适应，点击区域同步缩放对齐 */
+        @media (max-width: 480px) {
+            .letter-card { padding: 35px 25px; }
+            .cover-text { font-size: 18px; }
+            .cat-img-box { width: 220px; height: 220px; }
+            /* 手机端同步微调鼻头位置，保证精准 */
+            .nose-click-area {
+                top: 57%;
+                width: 23px;
+                height: 19px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 初始界面：小猫+鼻头点击触发 -->
+    <div class="cover" id="cover">
+        <div class="cat-img-box">
+            <img src="https://i.imgs.ovh/2026/06/17/fc095cf09929057f062ecd4f94316eae.jpg" 
+                 alt="可爱小猫" class="cat-img">
+            <!-- 精准鼻头点击层 -->
+            <div class="nose-click-area" id="noseClick"></div>
+        </div>
+        <div class="cover-text">点击小猫的鼻子查看</div>
+    </div>
+
+    <!-- 信件容器（初始隐藏） -->
+    <div class="letter-card" id="letter">
+        <div class="card-decor"></div>
+        <h2>致张青媛</h2>
+        <div class="letter-content">
+            <p>hallo，张青媛同学，首先要说的是这确实是一封表白信希望你不要感到过度的惊恐。因为不想太过的草率所以用了这样一个小页面</p>
+            <p>很高兴在21班遇到了你，现在想起来其实认识你比认识llt还早呢，我也非常荣幸能成为你的后座，坐在你后面那时我唯一忧愁的就是那不堪入目的成绩了，每天见到你都很开心。在我眼中你是一个独立，坚强，温柔，会为他人着想的小女孩。其实我经常会偷看你，但愿你不会毛骨悚然吧，你有时会在打完电话时自己掩面哭泣直到调整好自己，不希望将自己的情绪带给任何人，会喜悦的向朋友分享日常，会去慢慢的找四叶草和搜集好看的树叶。你是个独立的女生，但是依赖别人和有人依赖其实是两回事，希望你以后会遇见那个对的人，非常感谢这两年半里你对我的包容。</p>
+            <p>我喜欢你，喜欢你眉开眼笑的样子，喜欢你的温柔善良，喜欢听你描述一些趣事，喜欢你开玩笑的模样，喜欢你耐心的对待朋友，喜欢你的真诚坦率，在我眼中你真的是一个非常优秀的女孩。  我特别喜欢玩你的鼻孔鸡就是因为它是一只黄色的小鸡，而你是“叽媛” 。      你是个重视友谊的人，朋友圈的置顶都是和好友的合照【虽然不知道为什么现在也是三天可见QAQ】    我喜欢看别人的眼睛，你的眼睛总是非常的灵动，就像一颗黑珍珠【戴美瞳也很好看，非常哇塞】。   每次看见你微笑的样子就像被温和的阳光照耀着，每次返校的唯一动力就是回学校有你们这群好朋友，希望你以后可以少些忧虑多笑一笑。也希望无论结果如何不会影响我们之间的关系。</p>
+            <p>祝你未来成为理想中的样子，独立 坚强，一直明媚灿烂</p>
+        </div>
+        <div class="letter-sign">
+             2026年6月20日
+        </div>
+    </div>
+
+    <script>
+        const cover = document.getElementById('cover');
+        const letter = document.getElementById('letter');
+        const noseClick = document.getElementById('noseClick');
+
+        // 仅点击鼻头区域才打开信件
+        noseClick.addEventListener('click', () => {
+            cover.classList.add('hidden');
+            letter.classList.add('show');
+        });
+    </script>
+</body>
+</html>
